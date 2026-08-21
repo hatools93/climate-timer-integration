@@ -1,0 +1,33 @@
+start:
+  name: Start Climate Timer
+  description: >-
+    Turn on the climate entity (resolving HVAC mode automatically) and start
+    the managed timer with the specified duration.
+  fields:
+    entity_id:
+      name: Climate Entity
+      description: The climate entity to control.
+      required: true
+      selector:
+        entity:
+          domain: climate
+    duration:
+      name: Duration
+      description: Timer duration in HH:MM:SS format.
+      required: true
+      example: "01:30:00"
+      selector:
+        text:
+
+cancel:
+  name: Cancel Climate Timer
+  description: >-
+    Cancel the managed timer and turn off the climate entity.
+  fields:
+    entity_id:
+      name: Climate Entity
+      description: The climate entity to stop.
+      required: true
+      selector:
+        entity:
+          domain: climate

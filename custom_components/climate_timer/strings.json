@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Climate Timer",
+        "description": "Select a climate entity to manage with a timer. The integration will automatically create a timer helper and handle turn-off when the timer finishes.",
+        "data": {
+          "climate_entity": "Climate entity"
+        },
+        "data_description": {
+          "climate_entity": "The climate device you want to control with a timer."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "This climate entity is already configured with Climate Timer."
+    },
+    "error": {
+      "entity_not_found": "Entity not found in Home Assistant.",
+      "invalid_domain": "Selected entity must be a climate entity."
+    }
+  }
+}
