@@ -38,9 +38,9 @@ function createMockHass(overrides?: Partial<any>): HomeAssistant {
 }
 
 function createCard(): ClimateTimerCard {
-  const el = document.createElement("climate-timer-integration-card") as ClimateTimerCard;
+  const el = document.createElement("climate-timer-card") as ClimateTimerCard;
   el.setConfig({
-    type: "custom:climate-timer-integration-card",
+    type: "custom:climate-timer-card",
     entity: "climate.test_ac",
   });
   return el;
@@ -160,8 +160,8 @@ describe("Property: Cancel calls climate_timer.cancel with correct entity", () =
           vi.restoreAllMocks();
           const callService = vi.fn().mockResolvedValue(undefined);
 
-          const card = document.createElement("climate-timer-integration-card") as ClimateTimerCard;
-          card.setConfig({ type: "custom:climate-timer-integration-card", entity: "climate.test_ac" });
+          const card = document.createElement("climate-timer-card") as ClimateTimerCard;
+          card.setConfig({ type: "custom:climate-timer-card", entity: "climate.test_ac" });
           document.body.appendChild(card);
 
           try {
@@ -207,8 +207,8 @@ describe("Property: Managed timer entity naming convention", () => {
     const entities = ["climate.living_room_ac", "climate.bedroom_heater", "climate.test_ac"];
 
     for (const entityId of entities) {
-      const card = document.createElement("climate-timer-integration-card") as ClimateTimerCard;
-      card.setConfig({ type: "custom:climate-timer-integration-card", entity: entityId });
+      const card = document.createElement("climate-timer-card") as ClimateTimerCard;
+      card.setConfig({ type: "custom:climate-timer-card", entity: entityId });
       document.body.appendChild(card);
 
       const expected = `timer.climate_timer_${entityId.replace(".", "_")}`;
