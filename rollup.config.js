@@ -5,7 +5,7 @@ import terser from "@rollup/plugin-terser";
 export default {
   input: "src/main.ts",
   output: {
-    file: "dist/climate-timer-card.js",
+    file: "dist/climate-timer-integration-card.js",
     format: "es",
     sourcemap: false,
   },

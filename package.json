@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Home Assistant Climate Timer integration with embedded Lovelace card",
   "type": "module",
-  "main": "dist/climate-timer-card.js",
+  "main": "dist/climate-timer-integration-card.js",
   "scripts": {
-    "build": "rollup -c && cp dist/climate-timer-card.js custom_components/climate_timer/frontend/",
+    "build": "rollup -c && cp dist/climate-timer-integration-card.js custom_components/climate_timer/frontend/",
     "build:card": "rollup -c",
     "watch": "rollup -c --watch",
     "test": "vitest",
