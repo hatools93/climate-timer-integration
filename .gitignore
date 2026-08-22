@@ -1,0 +1,10 @@
+node_modules/
+dist/
+
+# Keep the built card JS in the integration frontend directory for HACS distribution
+!custom_components/climate_timer/frontend/climate-timer-card.js
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
