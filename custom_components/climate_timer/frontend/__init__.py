@@ -31,13 +31,29 @@ class JSModuleRegistration:
         """Register frontend resources."""
         await self._async_register_path()
 
-        # Only register modules if Lovelace is in storage mode
-        if self.lovelace and getattr(
-            self.lovelace,
-            "mode",
-            getattr(self.lovelace, "resource_mode", "yaml"),
-        ) == "storage":
-            await self._async_wait_for_lovelace_resources()
+        # Register modules if Lovelace is in storage mode
+        if self.lovelace:
+            mode = getattr(
+                self.lovelace,
+                "mode",
+                getattr(self.lovelace, "resource_mode", None),
+            )
+            _LOGGER.debug("Lovelace mode detected: %s", mode)
+            if mode == "storage":
+                await self._async_wait_for_lovelace_resources()
+            else:
+                _LOGGER.warning(
+                    "Lovelace is not in storage mode (%s). "
+                    "Add the following to your Lovelace resources manually: "
+                    "/climate-timer/climate-timer-card.js",
+                    mode,
+                )
+        else:
+            _LOGGER.warning(
+                "Lovelace data not available. "
+                "Add the following to your Lovelace resources manually: "
+                "/climate-timer/climate-timer-card.js"
+            )
 
     async def _async_register_path(self) -> None:
         """Register the static HTTP path to serve frontend files."""
