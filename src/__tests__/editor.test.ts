@@ -5,11 +5,11 @@ import { HomeAssistant } from "../ha-types";
 import { ClimateTimerCardConfig } from "../types";
 import { filterClimateEntities } from "../utils/entity-utils";
 
-if (!customElements.get("climate-timer-card-editor")) {
-  customElements.define("climate-timer-card-editor", ClimateTimerCardEditor);
+if (!customElements.get("climate-timer-integration-card-editor")) {
+  customElements.define("climate-timer-integration-card-editor", ClimateTimerCardEditor);
 }
-if (!customElements.get("climate-timer-card")) {
-  customElements.define("climate-timer-card", ClimateTimerCard);
+if (!customElements.get("climate-timer-integration-card")) {
+  customElements.define("climate-timer-integration-card", ClimateTimerCard);
 }
 
 function createMockHass(entities: Record<string, any> = {}): HomeAssistant {
@@ -24,7 +24,7 @@ function createMockConfig(
   overrides: Partial<ClimateTimerCardConfig> = {}
 ): ClimateTimerCardConfig {
   return {
-    type: "custom:climate-timer-card",
+    type: "custom:climate-timer-integration-card",
     entity: "climate.living_room_ac",
     ...overrides,
   };
