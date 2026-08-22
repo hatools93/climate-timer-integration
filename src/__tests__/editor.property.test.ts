@@ -4,8 +4,8 @@ import { ClimateTimerCardEditor } from "../components/climate-timer-card-editor"
 import { ClimateTimerCardConfig } from "../types";
 import { HomeAssistant } from "../ha-types";
 
-if (!customElements.get("climate-timer-card-editor")) {
-  customElements.define("climate-timer-card-editor", ClimateTimerCardEditor);
+if (!customElements.get("climate-timer-integration-card-editor")) {
+  customElements.define("climate-timer-integration-card-editor", ClimateTimerCardEditor);
 }
 
 function createMockHass(entities: Record<string, any> = {}): HomeAssistant {
@@ -25,7 +25,7 @@ const existingUiModeArb = fc.oneof(fc.constant(undefined), fc.constant("rotary" 
 const newUiModeArb = fc.oneof(fc.constant("rotary" as const), fc.constant("simple" as const));
 
 const configArb = fc.record({
-  type: fc.constant("custom:climate-timer-card"),
+  type: fc.constant("custom:climate-timer-integration-card"),
   entity: entityArb,
   max_duration: maxDurationArb,
   step: stepArb,

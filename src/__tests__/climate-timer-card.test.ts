@@ -47,9 +47,9 @@ function createMockHass(overrides?: Partial<any>): HomeAssistant {
 }
 
 function createCard(): ClimateTimerCard {
-  const el = document.createElement("climate-timer-card") as ClimateTimerCard;
+  const el = document.createElement("climate-timer-integration-card") as ClimateTimerCard;
   el.setConfig({
-    type: "custom:climate-timer-card",
+    type: "custom:climate-timer-integration-card",
     entity: "climate.test_ac",
   });
   return el;
@@ -235,8 +235,8 @@ describe("ClimateTimerCard - UI Mode Rendering", () => {
   let el: ClimateTimerCard;
 
   function createCardWithMode(uiMode?: string): ClimateTimerCard {
-    const card = document.createElement("climate-timer-card") as ClimateTimerCard;
-    const config: any = { type: "custom:climate-timer-card", entity: "climate.test_ac" };
+    const card = document.createElement("climate-timer-integration-card") as ClimateTimerCard;
+    const config: any = { type: "custom:climate-timer-integration-card", entity: "climate.test_ac" };
     if (uiMode !== undefined) config.ui_mode = uiMode;
     card.setConfig(config);
     return card;
