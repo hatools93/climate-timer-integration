@@ -15,7 +15,7 @@ import "./timer-display";
  * automatically. The card discovers the managed timer by naming convention
  * and delegates start/cancel to integration services.
  */
-@customElement("climate-timer-card")
+@customElement("climate-timer-integration-card")
 export class ClimateTimerCard extends LitElement {
   // HA injected properties
   @property({ attribute: false })
@@ -42,12 +42,12 @@ export class ClimateTimerCard extends LitElement {
   // --- HA Custom Card Interface ---
 
   static getConfigElement(): HTMLElement {
-    return document.createElement("climate-timer-card-editor");
+    return document.createElement("climate-timer-integration-card-editor");
   }
 
   static getStubConfig(): ClimateTimerCardConfig {
     return {
-      type: "custom:climate-timer-card",
+      type: "custom:climate-timer-integration-card",
       entity: "",
     };
   }
@@ -451,6 +451,6 @@ export class ClimateTimerCard extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "climate-timer-card": ClimateTimerCard;
+    "climate-timer-integration-card": ClimateTimerCard;
   }
 }

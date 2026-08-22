@@ -12,7 +12,7 @@ import { validateDurationConfig } from "../utils/duration-utils";
  * Only requires selecting a climate entity — the integration handles
  * timer management and HVAC mode persistence automatically.
  */
-@customElement("climate-timer-card-editor")
+@customElement("climate-timer-integration-card-editor")
 export class ClimateTimerCardEditor extends LitElement {
   @property({ attribute: false })
   hass!: HomeAssistant;
@@ -333,6 +333,6 @@ export class ClimateTimerCardEditor extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "climate-timer-card-editor": ClimateTimerCardEditor;
+    "climate-timer-integration-card-editor": ClimateTimerCardEditor;
   }
 }

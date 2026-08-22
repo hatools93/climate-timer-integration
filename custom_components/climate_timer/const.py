@@ -21,7 +21,7 @@ DEFAULT_DURATION: Final[str] = "00:30:00"
 URL_BASE: Final[str] = "/climate-timer"
 JSMODULES: Final[list[dict[str, str]]] = [
     {
-        "name": "Climate Timer Card",
+        "name": "Climate Timer Integration Card",
         "filename": "climate-timer-card.js",
         "version": INTEGRATION_VERSION,
     },

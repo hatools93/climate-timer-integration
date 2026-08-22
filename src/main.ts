@@ -8,8 +8,8 @@ import "./components/climate-timer-card-editor";
 // This makes the card discoverable when users add a new card in Lovelace
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: "climate-timer-card",
-  name: "Climate Timer Card",
+  type: "climate-timer-integration-card",
+  name: "Climate Timer Integration Card",
   description: "A timer-based climate entity controller that automatically turns off after a set duration.",
   preview: false,
 });
