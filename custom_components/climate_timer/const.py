@@ -18,11 +18,11 @@ TIMER_PREFIX: Final[str] = "climate_timer_"
 DEFAULT_DURATION: Final[str] = "00:30:00"
 
 # Frontend serving
-URL_BASE: Final[str] = "/climate-timer"
+URL_BASE: Final[str] = "/climate-timer-integration"
 JSMODULES: Final[list[dict[str, str]]] = [
     {
         "name": "Climate Timer Integration Card",
-        "filename": "climate-timer-card.js",
+        "filename": "climate-timer-integration-card.js",
         "version": INTEGRATION_VERSION,
     },
 ]

@@ -45,14 +45,14 @@ class JSModuleRegistration:
                 _LOGGER.warning(
                     "Lovelace is not in storage mode (%s). "
                     "Add the following to your Lovelace resources manually: "
-                    "/climate-timer/climate-timer-card.js",
+                    "/climate-timer-integration/climate-timer-integration-card.js",
                     mode,
                 )
         else:
             _LOGGER.warning(
                 "Lovelace data not available. "
                 "Add the following to your Lovelace resources manually: "
-                "/climate-timer/climate-timer-card.js"
+                "/climate-timer-integration/climate-timer-integration-card.js"
             )
 
     async def _async_register_path(self) -> None:
@@ -83,7 +83,23 @@ class JSModuleRegistration:
         """Register or update JavaScript modules as Lovelace resources."""
         _LOGGER.debug("Registering Climate Timer frontend modules")
 
-        # Get existing resources from this integration
+        # Get existing resources from this integration (current and legacy paths)
+        existing_resources = [
+            r
+            for r in self.lovelace.resources.async_items()
+            if r["url"].startswith(URL_BASE) or r["url"].startswith("/climate-timer/")
+        ]
+
+        # Remove any legacy resources from the old URL path
+        for resource in existing_resources:
+            if resource["url"].startswith("/climate-timer/") and not resource["url"].startswith(URL_BASE):
+                _LOGGER.info("Removing legacy resource: %s", resource["url"])
+                try:
+                    await self.lovelace.resources.async_delete_item(resource["id"])
+                except Exception:
+                    _LOGGER.warning("Failed to remove legacy resource: %s", resource["url"])
+
+        # Re-fetch after cleanup
         existing_resources = [
             r
             for r in self.lovelace.resources.async_items()

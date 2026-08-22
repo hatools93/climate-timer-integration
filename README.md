@@ -90,10 +90,10 @@ You can repeat this for multiple climate entities.
 
 ## Adding the Card to Your Dashboard
 
-After setup, add a new card to your dashboard and search for **"Climate Timer Card"** in the card picker, or add via YAML:
+After setup, add a new card to your dashboard and search for **"Climate Timer Integration Card"** in the card picker, or add via YAML:
 
 ```yaml
-type: custom:climate-timer-card
+type: custom:climate-timer-integration-card
 entity: climate.living_room_ac
 ```
 
@@ -113,7 +113,7 @@ That's it. No `timer_entity` or `mode_helper` configuration is needed — the in
 ### Full Example
 
 ```yaml
-type: custom:climate-timer-card
+type: custom:climate-timer-integration-card
 entity: climate.bedroom_ac
 max_duration: "2h"
 step: "15m"
