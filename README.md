@@ -1,6 +1,6 @@
 # Climate Timer Integration
 
-[![HACS Default](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
 A custom Home Assistant integration that runs any climate entity for a specified duration and automatically turns it off when the timer expires. Choose between a rotary dial or a simple button-based interface.
 
@@ -57,9 +57,14 @@ A custom Home Assistant integration that runs any climate entity for a specified
 
 ### HACS (Recommended)
 
-1. Go to **HACS -> Integrations -> Explore & Download Repositories**
-2. Search for "Climate Timer"
-3. Download and restart Home Assistant
+This integration is not yet in the HACS default repository. You can install it by adding it as a custom repository:
+
+1. Open **HACS** in your Home Assistant instance
+2. Click the **three-dot menu** (⋮) in the top-right corner and select **Custom repositories**
+3. Paste the repository URL: `https://github.com/melanga/climate-timer-integration`
+4. Select **Integration** as the category and click **Add**
+5. The repository will now appear in HACS — click **Download** to install it
+6. Restart Home Assistant
 
 ### Manual
 
