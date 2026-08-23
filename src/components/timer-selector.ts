@@ -11,7 +11,7 @@ import { computeRemainingMs, computeElapsedFraction } from "../utils/timer-utils
  *
  * Fires a "duration-changed" CustomEvent with detail: { duration: number }
  */
-@customElement("timer-selector")
+@customElement("cti-timer-selector")
 export class TimerSelector extends LitElement {
   @property({ type: Number })
   duration = 30;
@@ -515,6 +515,6 @@ export class TimerSelector extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "timer-selector": TimerSelector;
+    "cti-timer-selector": TimerSelector;
   }
 }
