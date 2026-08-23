@@ -1,11 +1,9 @@
 """Timer entity lifecycle management for Climate Timer integration.
 
-Creates and removes timer helper entities by interacting with the timer
-integration's StorageCollection. The collection is accessed via the
-websocket command registry where it is exposed as ``timer/create``.
-
-Falls back to writing directly to .storage/timer if the collection is
-not accessible (which requires a single HA restart to take effect).
+Creates and removes timer helper entities using Home Assistant's public
+helpers API. Uses multiple strategies in order of reliability:
+1. async_create_item on the timer StorageCollection (immediate, no restart)
+2. Direct storage file write (fallback, requires HA restart)
 """
 
 from __future__ import annotations
@@ -40,13 +38,18 @@ class TimerManager:
         Returns the timer entity_id.
         """
         timer_entity_id = get_timer_entity_id(climate_entity)
+        _LOGGER.debug(
+            "async_ensure_timer called for %s → expected timer: %s",
+            climate_entity,
+            timer_entity_id,
+        )
 
         # Check if timer already exists in entity registry
         entity_reg = er.async_get(self.hass)
         entry = entity_reg.async_get(timer_entity_id)
 
         if entry is not None:
-            _LOGGER.debug("Managed timer %s already exists, reusing", timer_entity_id)
+            _LOGGER.debug("Managed timer %s already exists in registry, reusing", timer_entity_id)
             return timer_entity_id
 
         # Also check hass.states in case it exists but isn't in registry yet
@@ -57,9 +60,10 @@ class TimerManager:
             return timer_entity_id
 
         # Create the timer
-        _LOGGER.info("Creating managed timer %s", timer_entity_id)
+        _LOGGER.info("Creating managed timer %s for %s", timer_entity_id, climate_entity)
         try:
             await self._async_create_timer(climate_entity)
+            _LOGGER.info("Successfully created managed timer %s", timer_entity_id)
         except Exception:
             _LOGGER.exception("Failed to create managed timer %s", timer_entity_id)
             raise
@@ -70,9 +74,8 @@ class TimerManager:
         """Create a timer helper entity.
 
         Strategy:
-        1. Try to access the timer StorageCollection via the websocket command
-           registry and inject the item directly (works immediately, no restart
-           needed, and gives us control over the entity ID).
+        1. Try the timer integration's StorageCollection via the component
+           data (the official integration data pattern).
         2. Fall back to writing the .storage/timer file directly. This persists
            the timer but requires an HA restart to load it into memory.
         """
@@ -80,9 +83,14 @@ class TimerManager:
         timer_id = f"{TIMER_PREFIX}{slug}"
         timer_name = f"Climate Timer - {_friendly_climate_name(self.hass, climate_entity)}"
 
-        # Strategy 1: Access the StorageCollection via websocket registry
+        _LOGGER.debug(
+            "Attempting to create timer id=%s, name=%s", timer_id, timer_name
+        )
+
+        # Strategy 1: Access StorageCollection via timer component data
         collection = self._get_timer_storage_collection()
         if collection is not None:
+            _LOGGER.debug("Found timer StorageCollection, attempting creation")
             # Check if our timer ID already exists in the collection
             if timer_id in collection.data:
                 _LOGGER.debug(
@@ -90,57 +98,85 @@ class TimerManager:
                 )
                 return
 
-            # Inject directly into the collection with our chosen ID.
-            # We validate the data the same way the collection would, then
-            # insert it and trigger change notifications so the entity is
-            # created immediately.
-            from homeassistant.helpers.collection import CHANGE_ADDED, CollectionChange
-
-            validated_data = await collection._process_create_data(
-                {
-                    "name": timer_name,
-                    "duration": DEFAULT_DURATION,
-                    "restore": True,
-                }
-            )
-            item = collection._create_item(timer_id, validated_data)
-            collection.data[timer_id] = item
-            collection._async_schedule_save()
-
-            # Compute the item hash for entity registry change detection
-            serialized = collection._serialize_item(timer_id, item)
-            item_hash = collection._hash_item(serialized) if hasattr(collection, "_hash_item") else None
-
-            await collection.notify_changes(
-                [CollectionChange(CHANGE_ADDED, timer_id, item, item_hash)]
-            )
-            _LOGGER.info("Created timer via StorageCollection (no restart needed)")
-            return
+            try:
+                await collection.async_create_item(
+                    {
+                        "id": timer_id,
+                        "name": timer_name,
+                        "duration": DEFAULT_DURATION,
+                        "restore": True,
+                    }
+                )
+                _LOGGER.info("Created timer %s via StorageCollection", timer_id)
+                return
+            except Exception:
+                _LOGGER.warning(
+                    "async_create_item failed for %s, trying fallback strategies",
+                    timer_id,
+                    exc_info=True,
+                )
 
         # Strategy 2: Write directly to storage file (requires restart)
         _LOGGER.warning(
-            "Timer StorageCollection not accessible. Writing to storage file — "
-            "a Home Assistant restart is required for the timer to appear."
+            "Timer StorageCollection not accessible for %s. Writing to storage file — "
+            "a Home Assistant restart is required for the timer to appear.",
+            timer_id,
         )
         await self._async_write_timer_to_storage(climate_entity, timer_name)
 
     def _get_timer_storage_collection(self) -> Any | None:
-        """Try to get the timer StorageCollection from the websocket registry.
+        """Try to get the timer StorageCollection.
 
-        The timer integration registers a DictStorageCollectionWebsocket which
-        exposes 'timer/create' as a websocket command. The handler chain is:
-            require_admin(async_response(self.ws_create_item))
-        Each decorator uses @wraps, so we follow __wrapped__ to reach the
-        bound method, then access __self__.storage_collection.
+        Attempts multiple known patterns across HA versions:
+        1. hass.data["timer"] with a storage_collection attribute (modern HA)
+        2. Websocket API registry introspection (older HA versions)
 
         Returns the StorageCollection if found, None otherwise.
         """
+        # Pattern 1: Direct component data access (HA 2023.x+)
+        # The timer integration stores its component data in hass.data["timer"]
+        try:
+            timer_data = self.hass.data.get("timer")
+            if timer_data is not None:
+                # In modern HA, timer_data is the StorageCollection directly
+                # or a dict containing the collection
+                collection = None
+
+                if hasattr(timer_data, "async_create_item"):
+                    collection = timer_data
+                elif isinstance(timer_data, dict):
+                    # Some versions store it under a key
+                    for key in ("storage_collection", "collection"):
+                        candidate = timer_data.get(key)
+                        if candidate and hasattr(candidate, "async_create_item"):
+                            collection = candidate
+                            break
+
+                if collection is not None:
+                    _LOGGER.debug("Found timer StorageCollection via component data")
+                    return collection
+        except Exception:
+            _LOGGER.debug("Could not access timer component data", exc_info=True)
+
+        # Pattern 2: Websocket API introspection (fallback for older HA)
         try:
             ws_handlers = self.hass.data.get("websocket_api")
-            if not ws_handlers or "timer/create" not in ws_handlers:
+            if not ws_handlers:
+                _LOGGER.debug("No websocket_api in hass.data")
                 return None
 
-            handler, _schema = ws_handlers["timer/create"]
+            # Try both possible key formats
+            handler_info = None
+            for key in ("timer/create", "timer/list"):
+                if key in ws_handlers:
+                    handler_info = ws_handlers[key]
+                    break
+
+            if handler_info is None:
+                _LOGGER.debug("No timer websocket handlers found")
+                return None
+
+            handler = handler_info[0] if isinstance(handler_info, tuple) else handler_info
 
             # Unwrap decorator layers (require_admin -> async_response -> bound method)
             unwrapped = handler
@@ -150,22 +186,26 @@ class TimerManager:
                     break
                 unwrapped = inner
 
-            # unwrapped should now be the bound method ws_create_item
+            # unwrapped should now be the bound method
             ws_instance = getattr(unwrapped, "__self__", None)
             if ws_instance is None:
+                _LOGGER.debug("Could not find __self__ on unwrapped handler")
                 return None
 
             collection = getattr(ws_instance, "storage_collection", None)
             if collection is None:
+                _LOGGER.debug("No storage_collection on websocket instance")
                 return None
 
             # Verify it has the methods we need
             if not hasattr(collection, "async_create_item"):
+                _LOGGER.debug("Collection missing async_create_item method")
                 return None
 
+            _LOGGER.debug("Found timer StorageCollection via websocket introspection")
             return collection
         except Exception:
-            _LOGGER.debug("Could not access timer StorageCollection", exc_info=True)
+            _LOGGER.debug("Could not access timer StorageCollection via websocket", exc_info=True)
             return None
 
     async def _async_write_timer_to_storage(
@@ -203,10 +243,14 @@ class TimerManager:
         )
         data["items"] = items
         await store.async_save(data)
+        _LOGGER.info(
+            "Timer %s written to storage file. Restart HA for it to appear.", timer_id
+        )
 
     async def async_remove_timer(self, timer_entity_id: str) -> None:
         """Remove a managed timer entity."""
         item_id = timer_entity_id.removeprefix("timer.")
+        _LOGGER.debug("Removing managed timer: %s (item_id=%s)", timer_entity_id, item_id)
 
         # Strategy 1: Remove via StorageCollection
         collection = self._get_timer_storage_collection()

@@ -61,10 +61,26 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ClimateTimerConfigEntry) -> bool:
     """Set up Climate Timer from a config entry."""
     climate_entity = entry.data["climate_entity"]
+    _LOGGER.debug(
+        "Setting up Climate Timer entry for %s (entry_id=%s)",
+        climate_entity,
+        entry.entry_id,
+    )
     manager = TimerManager(hass)
 
     # Create managed timer if it doesn't exist
-    timer_entity_id = await manager.async_ensure_timer(climate_entity)
+    try:
+        timer_entity_id = await manager.async_ensure_timer(climate_entity)
+    except Exception:
+        _LOGGER.exception(
+            "Failed to ensure timer for %s — entry will not be set up",
+            climate_entity,
+        )
+        return False
+
+    _LOGGER.info(
+        "Climate Timer entry ready: %s → %s", climate_entity, timer_entity_id
+    )
 
     # Initialize mode storage (shared across entries, done once)
     if hass.data[DOMAIN]["mode_store"] is None:
