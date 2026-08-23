@@ -9,7 +9,7 @@ import { computeRemainingMs } from "../utils/timer-utils";
  *
  * Fires a "duration-changed" CustomEvent with detail: { duration: number }
  */
-@customElement("simple-timer-selector")
+@customElement("cti-simple-timer-selector")
 export class SimpleTimerSelector extends LitElement {
   @property({ type: Number })
   duration = 30;
@@ -186,6 +186,6 @@ export class SimpleTimerSelector extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "simple-timer-selector": SimpleTimerSelector;
+    "cti-simple-timer-selector": SimpleTimerSelector;
   }
 }
