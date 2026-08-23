@@ -256,7 +256,7 @@ export class ClimateTimerCardEditor extends LitElement {
   private _hasManagedTimer(): boolean {
     if (!this._config?.entity || !this.hass) return false;
     const slug = this._config.entity.replace(/\./g, "_");
-    const managed = `timer.climate_timer_${slug}`;
+    const managed = `sensor.climate_timer_${slug}`;
     return !!this.hass.states[managed];
   }
 

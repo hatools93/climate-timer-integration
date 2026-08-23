@@ -38,12 +38,12 @@ EVENT_TIMER_CANCELLED: Final[str] = f"{DOMAIN}_cancelled"
 
 
 def get_timer_entity_id(climate_entity: str) -> str:
-    """Get the managed timer entity_id for a climate entity.
+    """Get the managed timer sensor entity_id for a climate entity.
 
-    Naming convention: timer.climate_timer_{entity_slug}
+    Naming convention: sensor.climate_timer_{entity_slug}
     where entity_slug is the climate entity_id with dots replaced by underscores.
 
-    Example: climate.living_room_ac -> timer.climate_timer_climate_living_room_ac
+    Example: climate.living_room_ac -> sensor.climate_timer_climate_living_room_ac
     """
     slug = climate_entity.replace(".", "_")
-    return f"timer.{TIMER_PREFIX}{slug}"
+    return f"sensor.{TIMER_PREFIX}{slug}"

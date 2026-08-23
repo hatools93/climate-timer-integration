@@ -18,8 +18,8 @@ function createMockHass(overrides?: Partial<any>): HomeAssistant {
           current_temperature: 25,
         },
       },
-      "timer.climate_timer_climate_test_ac": {
-        entity_id: "timer.climate_timer_climate_test_ac",
+      "sensor.climate_timer_climate_test_ac": {
+        entity_id: "sensor.climate_timer_climate_test_ac",
         state: "idle",
         attributes: {
           duration: "00:30:00",
@@ -110,8 +110,8 @@ describe("Property: Start calls climate_timer.start with correct entity and dura
                 state: climateState,
                 attributes: { friendly_name: "Test AC", hvac_modes: ["off", "heat", "cool", "dry", "fan_only"], temperature: 24, current_temperature: 25 },
               },
-              "timer.climate_timer_climate_test_ac": {
-                entity_id: "timer.climate_timer_climate_test_ac",
+              "sensor.climate_timer_climate_test_ac": {
+                entity_id: "sensor.climate_timer_climate_test_ac",
                 state: "idle",
                 attributes: { duration: "00:30:00", remaining: "00:00:00", finishes_at: "", friendly_name: "Climate Timer", restore: true },
               },
@@ -173,8 +173,8 @@ describe("Property: Cancel calls climate_timer.cancel with correct entity", () =
                   state: activeMode,
                   attributes: { friendly_name: "Test AC", hvac_modes: ["off", "heat", "cool", "dry", "fan_only"], temperature: 24, current_temperature: 25 },
                 },
-                "timer.climate_timer_climate_test_ac": {
-                  entity_id: "timer.climate_timer_climate_test_ac",
+                "sensor.climate_timer_climate_test_ac": {
+                  entity_id: "sensor.climate_timer_climate_test_ac",
                   state: "active",
                   attributes: { duration: "00:30:00", remaining: "00:15:00", finishes_at: finishesAt, friendly_name: "Climate Timer", restore: true },
                 },
@@ -211,7 +211,7 @@ describe("Property: Managed timer entity naming convention", () => {
       card.setConfig({ type: "custom:climate-timer-integration-card", entity: entityId });
       document.body.appendChild(card);
 
-      const expected = `timer.climate_timer_${entityId.replace(".", "_")}`;
+      const expected = `sensor.climate_timer_${entityId.replace(".", "_")}`;
       card.hass = {
         states: {
           [entityId]: { entity_id: entityId, state: "off", attributes: { friendly_name: "Test", hvac_modes: ["off"], temperature: 24, current_temperature: 25 } },

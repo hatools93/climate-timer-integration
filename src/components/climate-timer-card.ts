@@ -76,12 +76,12 @@ export class ClimateTimerCard extends LitElement {
 
   /**
    * Discovers the managed timer entity using the integration's naming convention.
-   * Pattern: timer.climate_timer_{entity_slug}
+   * Pattern: sensor.climate_timer_{entity_slug}
    */
   private get _managedTimerEntity(): string | null {
     if (!this._config?.entity) return null;
     const slug = this._config.entity.replace(/\./g, "_");
-    const managed = `timer.climate_timer_${slug}`;
+    const managed = `sensor.climate_timer_${slug}`;
     if (this.hass?.states[managed]) {
       return managed;
     }
