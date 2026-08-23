@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -38,6 +40,14 @@ jobs:
           jq '.version = "${{ steps.version.outputs.version }}"' \
             custom_components/climate_timer/manifest.json > tmp.json \
             && mv tmp.json custom_components/climate_timer/manifest.json
+
+      - name: Commit updated manifest version to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add custom_components/climate_timer/manifest.json
+          git diff --cached --quiet || git commit -m "chore: update manifest version to ${{ steps.version.outputs.version }}"
+          git push origin main
 
       - name: Build frontend card
         run: npm run build
