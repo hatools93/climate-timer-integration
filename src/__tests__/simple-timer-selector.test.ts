@@ -6,7 +6,7 @@ describe("SimpleTimerSelector - Idle State", () => {
   let el: SimpleTimerSelector;
 
   beforeEach(async () => {
-    el = document.createElement("simple-timer-selector") as SimpleTimerSelector;
+    el = document.createElement("cti-simple-timer-selector") as SimpleTimerSelector;
     el.duration = 30;
     el.maxDuration = 240;
     el.stepSize = 15;
@@ -178,7 +178,7 @@ describe("SimpleTimerSelector - Active State (Countdown)", () => {
 
   beforeEach(async () => {
     vi.useFakeTimers();
-    el = document.createElement("simple-timer-selector") as SimpleTimerSelector;
+    el = document.createElement("cti-simple-timer-selector") as SimpleTimerSelector;
     el.duration = 30;
     el.maxDuration = 240;
     el.stepSize = 15;
@@ -271,7 +271,7 @@ describe("SimpleTimerSelector - Accessibility", () => {
   let el: SimpleTimerSelector;
 
   beforeEach(async () => {
-    el = document.createElement("simple-timer-selector") as SimpleTimerSelector;
+    el = document.createElement("cti-simple-timer-selector") as SimpleTimerSelector;
     el.duration = 60;
     el.maxDuration = 240;
     el.stepSize = 15;

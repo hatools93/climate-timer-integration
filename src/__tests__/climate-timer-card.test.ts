@@ -253,8 +253,8 @@ describe("ClimateTimerCard - UI Mode Rendering", () => {
     el.hass = createMockHass();
     await el.updateComplete;
 
-    expect(el.shadowRoot!.querySelector("timer-selector")).not.toBeNull();
-    expect(el.shadowRoot!.querySelector("simple-timer-selector")).toBeNull();
+    expect(el.shadowRoot!.querySelector("cti-timer-selector")).not.toBeNull();
+    expect(el.shadowRoot!.querySelector("cti-simple-timer-selector")).toBeNull();
   });
 
   it("renders <timer-selector> when ui_mode is undefined (not set)", async () => {
@@ -263,8 +263,8 @@ describe("ClimateTimerCard - UI Mode Rendering", () => {
     el.hass = createMockHass();
     await el.updateComplete;
 
-    expect(el.shadowRoot!.querySelector("timer-selector")).not.toBeNull();
-    expect(el.shadowRoot!.querySelector("simple-timer-selector")).toBeNull();
+    expect(el.shadowRoot!.querySelector("cti-timer-selector")).not.toBeNull();
+    expect(el.shadowRoot!.querySelector("cti-simple-timer-selector")).toBeNull();
   });
 
   it("renders <simple-timer-selector> when ui_mode is 'simple'", async () => {
@@ -273,8 +273,8 @@ describe("ClimateTimerCard - UI Mode Rendering", () => {
     el.hass = createMockHass();
     await el.updateComplete;
 
-    expect(el.shadowRoot!.querySelector("simple-timer-selector")).not.toBeNull();
-    expect(el.shadowRoot!.querySelector("timer-selector")).toBeNull();
+    expect(el.shadowRoot!.querySelector("cti-simple-timer-selector")).not.toBeNull();
+    expect(el.shadowRoot!.querySelector("cti-timer-selector")).toBeNull();
   });
 
   it("renders <timer-selector> when ui_mode is an invalid value (fallback)", async () => {
@@ -283,7 +283,7 @@ describe("ClimateTimerCard - UI Mode Rendering", () => {
     el.hass = createMockHass();
     await el.updateComplete;
 
-    expect(el.shadowRoot!.querySelector("timer-selector")).not.toBeNull();
-    expect(el.shadowRoot!.querySelector("simple-timer-selector")).toBeNull();
+    expect(el.shadowRoot!.querySelector("cti-timer-selector")).not.toBeNull();
+    expect(el.shadowRoot!.querySelector("cti-simple-timer-selector")).toBeNull();
   });
 });

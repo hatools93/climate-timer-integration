@@ -12,7 +12,7 @@ describe("TimerDisplay", () => {
   let el: TimerDisplay;
 
   beforeEach(() => {
-    el = document.createElement("timer-display") as TimerDisplay;
+    el = document.createElement("cti-timer-display") as TimerDisplay;
     document.body.appendChild(el);
   });
 

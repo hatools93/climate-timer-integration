@@ -463,7 +463,7 @@ describe("Feature: ui-mode-selection, Property 6: Event Contract Consistency", (
         if (action === "decrement" && duration <= step) return;
 
         // Create element
-        const el = document.createElement("simple-timer-selector") as SimpleTimerSelector;
+        const el = document.createElement("cti-simple-timer-selector") as SimpleTimerSelector;
         el.duration = duration;
         el.maxDuration = maxDuration;
         el.stepSize = step;
@@ -505,7 +505,7 @@ describe("Feature: ui-mode-selection, Property 6: Event Contract Consistency", (
         if (action === "increment" && duration >= maxDuration) return;
         if (action === "decrement" && duration <= step) return;
 
-        const el = document.createElement("simple-timer-selector") as SimpleTimerSelector;
+        const el = document.createElement("cti-simple-timer-selector") as SimpleTimerSelector;
         el.duration = duration;
         el.maxDuration = maxDuration;
         el.stepSize = step;

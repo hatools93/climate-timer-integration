@@ -6,7 +6,7 @@ describe("TimerSelector", () => {
   let el: TimerSelector;
 
   beforeEach(async () => {
-    el = document.createElement("timer-selector") as TimerSelector;
+    el = document.createElement("cti-timer-selector") as TimerSelector;
     el.duration = 30;
     el.disabled = false;
     document.body.appendChild(el);
