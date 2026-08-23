@@ -403,7 +403,7 @@ export class ClimateTimerCard extends LitElement {
             : nothing}
 
           ${resolveUiMode(this._config) === "simple"
-            ? html`<simple-timer-selector
+            ? html`<cti-simple-timer-selector
                 .duration=${this._selectedDuration}
                 .disabled=${this._isTimerActive}
                 .maxDuration=${this._configMaxDuration}
@@ -412,8 +412,8 @@ export class ClimateTimerCard extends LitElement {
                 .durationStr=${this._timerDuration}
                 .timerActive=${this._isTimerActive}
                 @duration-changed=${this._handleDurationChange}
-              ></simple-timer-selector>`
-            : html`<timer-selector
+              ></cti-simple-timer-selector>`
+            : html`<cti-timer-selector
                 .duration=${this._selectedDuration}
                 .disabled=${this._isTimerActive}
                 .maxDuration=${this._configMaxDuration}
@@ -422,7 +422,7 @@ export class ClimateTimerCard extends LitElement {
                 .durationStr=${this._timerDuration}
                 .timerActive=${this._isTimerActive}
                 @duration-changed=${this._handleDurationChange}
-              ></timer-selector>`}
+              ></cti-timer-selector>`}
 
           ${this._errorMessage ? html`<div class="error">${this._errorMessage}</div>` : nothing}
 

@@ -10,7 +10,7 @@ import { formatCountdown } from "../utils/format-utils";
  * The parent component triggers re-renders every 1 second; this component
  * simply computes the display from the current time on each render.
  */
-@customElement("timer-display")
+@customElement("cti-timer-display")
 export class TimerDisplay extends LitElement {
   /**
    * ISO timestamp of when the timer finishes. Null when no timer is active.
@@ -125,6 +125,6 @@ export class TimerDisplay extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "timer-display": TimerDisplay;
+    "cti-timer-display": TimerDisplay;
   }
 }
