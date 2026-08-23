@@ -29,12 +29,18 @@ jobs:
       - name: Run tests
         run: npm run test:run
 
-      - name: Build frontend card
-        run: npm run build
-
       - name: Get version from tag
         id: version
         run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Update manifest version
+        run: |
+          jq '.version = "${{ steps.version.outputs.version }}"' \
+            custom_components/climate_timer/manifest.json > tmp.json \
+            && mv tmp.json custom_components/climate_timer/manifest.json
+
+      - name: Build frontend card
+        run: npm run build
 
       - name: Package custom component
         run: |
