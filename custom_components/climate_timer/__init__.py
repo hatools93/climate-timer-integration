@@ -1,6 +1,6 @@
 """Climate Timer integration for Home Assistant.
 
-Automatically manages timer helpers for climate entities, handles HVAC mode
+Manages custom timer sensor entities for climate entities, handles HVAC mode
 persistence, and turns off climate entities when timers finish.
 """
 
@@ -10,7 +10,7 @@ import logging
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
+from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
 from homeassistant.core import CoreState, Event, HomeAssistant, ServiceCall, callback
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
@@ -25,12 +25,12 @@ from .const import (
     EVENT_TIMER_STARTED,
     STORAGE_KEY,
     STORAGE_VERSION,
-    get_timer_entity_id,
 )
 from .frontend import JSModuleRegistration
-from .timer_manager import TimerManager
 
 _LOGGER = logging.getLogger(__name__)
+
+PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 type ClimateTimerConfigEntry = ConfigEntry
 
@@ -66,21 +66,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ClimateTimerConfigEntry)
         climate_entity,
         entry.entry_id,
     )
-    manager = TimerManager(hass)
-
-    # Create managed timer if it doesn't exist
-    try:
-        timer_entity_id = await manager.async_ensure_timer(climate_entity)
-    except Exception:
-        _LOGGER.exception(
-            "Failed to ensure timer for %s — entry will not be set up",
-            climate_entity,
-        )
-        return False
-
-    _LOGGER.info(
-        "Climate Timer entry ready: %s → %s", climate_entity, timer_entity_id
-    )
 
     # Initialize mode storage (shared across entries, done once)
     if hass.data[DOMAIN]["mode_store"] is None:
@@ -88,35 +73,35 @@ async def async_setup_entry(hass: HomeAssistant, entry: ClimateTimerConfigEntry)
         hass.data[DOMAIN]["mode_store"] = store
         hass.data[DOMAIN]["stored_modes"] = await store.async_load() or {}
 
-    # Store entry data
+    # Store entry data (timer_sensor will be set by the sensor platform)
     hass.data[DOMAIN]["entries"][entry.entry_id] = {
         "climate_entity": climate_entity,
-        "timer_entity": timer_entity_id,
-        "manager": manager,
+        "timer_sensor": None,
     }
+
+    # Forward to sensor platform — this creates the timer sensor entity
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Register services (idempotent — only registers once)
     _async_register_services(hass)
 
-    # Register event listener for timer.finished (idempotent)
+    # Register event listener for our timer finished events (idempotent)
     _async_register_event_listener(hass)
 
     # Track climate state changes for HVAC mode persistence
     _async_track_climate_state(hass, entry.entry_id, climate_entity)
 
+    _LOGGER.info("Climate Timer entry ready for %s", climate_entity)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ClimateTimerConfigEntry) -> bool:
-    """Unload a config entry — remove managed timer."""
-    entry_data = hass.data[DOMAIN]["entries"].pop(entry.entry_id, None)
-    if entry_data:
-        try:
-            await entry_data["manager"].async_remove_timer(entry_data["timer_entity"])
-        except Exception:
-            _LOGGER.warning(
-                "Failed to remove managed timer %s", entry_data["timer_entity"]
-            )
+    """Unload a config entry."""
+    # Unload platforms (removes sensor entity)
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+    if unload_ok:
+        hass.data[DOMAIN]["entries"].pop(entry.entry_id, None)
 
     # Remove state listener
     unsub = hass.data[DOMAIN]["listeners"].pop(entry.entry_id, None)
@@ -130,7 +115,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ClimateTimerConfigEntry
             event_unsub()
             hass.data[DOMAIN]["event_unsub"] = None
 
-    return True
+    return unload_ok
 
 
 # --- Service Registration ---
@@ -154,7 +139,13 @@ def _async_register_services(hass: HomeAssistant) -> None:
                 "Please add it via Settings > Devices & Services > Climate Timer."
             )
 
-        timer_entity_id = entry_data["timer_entity"]
+        timer_sensor = entry_data.get("timer_sensor")
+        if not timer_sensor:
+            raise ServiceValidationError(
+                f"Timer sensor not ready for {climate_entity_id}. "
+                "Try reloading the integration."
+            )
+
         climate_state = hass.states.get(climate_entity_id)
 
         # Determine if climate is currently off
@@ -187,15 +178,9 @@ def _async_register_services(hass: HomeAssistant) -> None:
                     f"Failed to turn on {climate_entity_id}: {err}"
                 ) from err
 
-        # Start the managed timer
+        # Start our custom timer sensor
         try:
-            await hass.services.async_call(
-                "timer",
-                "start",
-                {"duration": duration},
-                target={"entity_id": timer_entity_id},
-                blocking=True,
-            )
+            timer_sensor.async_start(duration)
         except Exception as err:
             # Rollback: turn off climate if we turned it on
             if entity_is_off:
@@ -210,7 +195,7 @@ def _async_register_services(hass: HomeAssistant) -> None:
                 except Exception:
                     _LOGGER.warning("Rollback: failed to turn off %s", climate_entity_id)
             raise ServiceValidationError(
-                f"Failed to start timer {timer_entity_id}: {err}"
+                f"Failed to start timer for {climate_entity_id}: {err}"
             ) from err
 
         # Fire logbook event for timer started
@@ -232,19 +217,9 @@ def _async_register_services(hass: HomeAssistant) -> None:
                 f"No Climate Timer config entry for {climate_entity_id}."
             )
 
-        timer_entity_id = entry_data["timer_entity"]
-
-        # Cancel the timer
-        try:
-            await hass.services.async_call(
-                "timer",
-                "cancel",
-                {},
-                target={"entity_id": timer_entity_id},
-                blocking=True,
-            )
-        except Exception:
-            _LOGGER.warning("Failed to cancel timer %s", timer_entity_id)
+        timer_sensor = entry_data.get("timer_sensor")
+        if timer_sensor:
+            timer_sensor.async_cancel()
 
         # Turn off climate
         try:
@@ -295,44 +270,40 @@ def _async_register_services(hass: HomeAssistant) -> None:
 
 @callback
 def _async_register_event_listener(hass: HomeAssistant) -> None:
-    """Register listener for timer.finished events (idempotent)."""
+    """Register listener for our custom timer finished events (idempotent)."""
     if hass.data[DOMAIN].get("event_unsub"):
         return
 
     async def _handle_timer_finished(event: Event) -> None:
-        """Handle timer.finished event for managed timers."""
-        timer_entity_id = event.data.get("entity_id")
-        if not timer_entity_id:
+        """Handle climate_timer_timer_finished event."""
+        climate_entity_id = event.data.get("entity_id")
+        if not climate_entity_id:
             return
 
-        # Find the climate entity paired with this timer
-        for entry_data in hass.data[DOMAIN]["entries"].values():
-            if entry_data["timer_entity"] == timer_entity_id:
-                climate_entity_id = entry_data["climate_entity"]
-                try:
-                    await hass.services.async_call(
-                        "climate",
-                        "turn_off",
-                        {},
-                        target={"entity_id": climate_entity_id},
-                        blocking=True,
-                    )
-                except Exception:
-                    _LOGGER.warning(
-                        "Failed to turn off %s after timer finished",
-                        climate_entity_id,
-                    )
+        # Turn off the climate entity
+        try:
+            await hass.services.async_call(
+                "climate",
+                "turn_off",
+                {},
+                target={"entity_id": climate_entity_id},
+                blocking=True,
+            )
+        except Exception:
+            _LOGGER.warning(
+                "Failed to turn off %s after timer finished",
+                climate_entity_id,
+            )
 
-                # Fire logbook event for timer finished
-                hass.bus.async_fire(
-                    EVENT_TIMER_FINISHED,
-                    {
-                        "entity_id": climate_entity_id,
-                    },
-                )
-                break
+        # Fire logbook event for timer finished
+        hass.bus.async_fire(
+            EVENT_TIMER_FINISHED,
+            {
+                "entity_id": climate_entity_id,
+            },
+        )
 
-    unsub = hass.bus.async_listen("timer.finished", _handle_timer_finished)
+    unsub = hass.bus.async_listen(f"{DOMAIN}_timer_finished", _handle_timer_finished)
     hass.data[DOMAIN]["event_unsub"] = unsub
 
 
