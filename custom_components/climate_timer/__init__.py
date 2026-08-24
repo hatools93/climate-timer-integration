@@ -9,6 +9,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import voluptuous as vol
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
 from homeassistant.core import CoreState, Event, HomeAssistant, ServiceCall, callback
@@ -245,10 +247,10 @@ def _async_register_services(hass: HomeAssistant) -> None:
         DOMAIN,
         "start",
         _async_handle_start,
-        schema=cv.make_entity_service_schema(
+        schema=vol.Schema(
             {
-                "entity_id": cv.entity_id,
-                "duration": cv.string,
+                vol.Required("entity_id"): cv.entity_id,
+                vol.Required("duration"): cv.string,
             }
         ),
     )
@@ -257,9 +259,9 @@ def _async_register_services(hass: HomeAssistant) -> None:
         DOMAIN,
         "cancel",
         _async_handle_cancel,
-        schema=cv.make_entity_service_schema(
+        schema=vol.Schema(
             {
-                "entity_id": cv.entity_id,
+                vol.Required("entity_id"): cv.entity_id,
             }
         ),
     )
