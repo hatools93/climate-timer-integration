@@ -1,10 +1,10 @@
 # Climate Timer Integration
 
-[![Validate](https://github.com/melanga/climate-timer-integration/actions/workflows/validate.yml/badge.svg)](https://github.com/melanga/climate-timer-integration/actions/workflows/validate.yml)
-[![Release](https://github.com/melanga/climate-timer-integration/actions/workflows/release.yml/badge.svg)](https://github.com/melanga/climate-timer-integration/actions/workflows/release.yml)
+[![Validate](https://github.com/hatools93/climate-timer-integration/actions/workflows/validate.yml/badge.svg)](https://github.com/hatools93/climate-timer-integration/actions/workflows/validate.yml)
+[![Release](https://github.com/hatools93/climate-timer-integration/actions/workflows/release.yml/badge.svg)](https://github.com/hatools93/climate-timer-integration/actions/workflows/release.yml)
 [![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
-[![Downloads](https://img.shields.io/github/downloads/melanga/climate-timer-integration/total?label=downloads)](https://github.com/melanga/climate-timer-integration/releases)
-[![Downloads@latest](https://img.shields.io/github/downloads/melanga/climate-timer-integration/latest/total?label=downloads%40latest)](https://github.com/melanga/climate-timer-integration/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/hatools93/climate-timer-integration/total?label=downloads)](https://github.com/hatools93/climate-timer-integration/releases)
+[![Downloads@latest](https://img.shields.io/github/downloads/hatools93/climate-timer-integration/latest/total?label=downloads%40latest)](https://github.com/hatools93/climate-timer-integration/releases/latest)
 
 A custom Home Assistant integration that runs any climate entity for a specified duration and automatically turns it off when the timer expires. Choose between a rotary dial or a simple button-based interface.
 
@@ -68,7 +68,7 @@ This integration is not yet in the HACS default repository. You can install it b
 
 1. Open **HACS** in your Home Assistant instance
 2. Click the **three-dot menu** (⋮) in the top-right corner and select **Custom repositories**
-3. Paste the repository URL: `https://github.com/melanga/climate-timer-integration`
+3. Paste the repository URL: `https://github.com/hatools93/climate-timer-integration`
 4. Select **Integration** as the category and click **Add**
 5. The repository will now appear in HACS — click **Download** to install it
 6. Restart Home Assistant
