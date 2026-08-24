@@ -2,7 +2,7 @@ import { LitElement, html, css, nothing, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { HomeAssistant } from "../ha-types";
 import { ClimateTimerCardConfig } from "../types";
-import { minutesToHADuration, parseDurationString, MAX_DURATION, STEP, resolveUiMode } from "../utils/duration-utils";
+import { minutesToHADuration, parseDurationString, parseDurationToMs, MAX_DURATION, STEP, resolveUiMode } from "../utils/duration-utils";
 import "./timer-selector";
 import "./simple-timer-selector";
 import "./timer-display";
@@ -32,6 +32,9 @@ export class ClimateTimerCard extends LitElement {
   private _errorMessage: string | null = null;
 
   private _displayIntervalId: number | null = null;
+
+  // Whether _selectedDuration has been initialized from the sensor's stored duration
+  private _durationInitialized = false;
 
   // Track previous timer state for transition detection
   private _previousTimerState: string | undefined;
@@ -170,11 +173,35 @@ export class ClimateTimerCard extends LitElement {
       ? this.hass?.states[timerEntity]?.state
       : undefined;
 
+    // Initialize _selectedDuration from the sensor's stored duration attribute
+    // on first load (when the entity becomes available).
+    if (!this._durationInitialized && timerEntity) {
+      const storedDuration = this.hass?.states[timerEntity]?.attributes?.duration;
+      if (storedDuration) {
+        const minutes = Math.round(parseDurationToMs(storedDuration) / 60000);
+        if (minutes > 0) {
+          this._selectedDuration = minutes;
+        }
+        this._durationInitialized = true;
+      }
+    }
+
     if (this._previousTimerState !== currentTimerState) {
       if (currentTimerState === "active" && this._previousTimerState !== "active") {
         this._startDisplayInterval();
       } else if (currentTimerState !== "active" && this._previousTimerState === "active") {
         this._stopDisplayInterval();
+        // Restore _selectedDuration from the sensor's duration attribute
+        // (which holds the last-used duration) when the timer finishes or is cancelled.
+        if (timerEntity) {
+          const lastDuration = this.hass?.states[timerEntity]?.attributes?.duration;
+          if (lastDuration) {
+            const minutes = Math.round(parseDurationToMs(lastDuration) / 60000);
+            if (minutes > 0) {
+              this._selectedDuration = minutes;
+            }
+          }
+        }
       }
       this._previousTimerState = currentTimerState;
     }
