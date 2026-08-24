@@ -1,6 +1,10 @@
 # Climate Timer Integration
 
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![Validate](https://github.com/melanga/climate-timer-integration/actions/workflows/validate.yml/badge.svg)](https://github.com/melanga/climate-timer-integration/actions/workflows/validate.yml)
+[![Release](https://github.com/melanga/climate-timer-integration/actions/workflows/release.yml/badge.svg)](https://github.com/melanga/climate-timer-integration/actions/workflows/release.yml)
+[![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
+[![Downloads](https://img.shields.io/github/downloads/melanga/climate-timer-integration/total?label=downloads)](https://github.com/melanga/climate-timer-integration/releases)
+[![Downloads@latest](https://img.shields.io/github/downloads/melanga/climate-timer-integration/latest/total?label=downloads%40latest)](https://github.com/melanga/climate-timer-integration/releases/latest)
 
 A custom Home Assistant integration that runs any climate entity for a specified duration and automatically turns it off when the timer expires. Choose between a rotary dial or a simple button-based interface.
 
@@ -33,6 +37,7 @@ A custom Home Assistant integration that runs any climate entity for a specified
 - **Zero manual setup** — timer helpers are created and managed automatically per climate entity
 - **Built-in auto-off** — the integration handles turning off the climate entity server-side when the timer finishes (no companion automation needed)
 - **HVAC mode persistence** — remembers the last active HVAC mode and restores it on next start, without any extra helpers
+- **Duration persistence** — remembers the last-used timer duration so it's pre-filled on the next run
 - **Rotary dial UI** — drag, scroll, or swipe to set timer duration
 - **Simple UI mode** — clean capsule-shaped button interface with [-] duration [+] controls
 - **Real-time countdown** — animated elapsed arc with MM:SS display inside the dial
@@ -43,9 +48,11 @@ A custom Home Assistant integration that runs any climate entity for a specified
 - **Configurable** — max duration, step size, show/hide name and state
 - **Layout support** — works with HA grid resizing
 
-## What's Different From the Legacy Card-Only Approach
+## What's Different From the Card-Only Approach
 
-| | Legacy (card only) | This Integration |
+The [Climate Timer Card](https://github.com/melanga/climate-timer-card) is a standalone Lovelace card that provides the timer UI but requires you to manually create timer helpers, input selects, and automations to handle the turn-off logic. This integration bundles everything together — no separate card install, no manual helpers, no extra automations.
+
+| | Card-Only | This Integration |
 |---|---|---|
 | Frontend card install | Separate (HACS frontend or manual JS) | Bundled — auto-registered on setup |
 | Timer helper | Manual creation required | Auto-created and managed |
