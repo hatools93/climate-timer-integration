@@ -14,5 +14,5 @@
   "integration_type": "service",
   "iot_class": "local_push",
   "issue_tracker": "https://github.com/hatools93/climate-timer-integration/issues",
-  "version": "1.4.4"
+  "version": "1.5.0"
 }
