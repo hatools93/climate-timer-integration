@@ -81,14 +81,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ClimateTimerConfigEntry)
         "timer_sensor": None,
     }
 
+    # Register event listener for our timer finished events (idempotent)
+    # before the sensor platform is set up: a restored timer that already
+    # expired fires its finish event while the sensor entity is added.
+    _async_register_event_listener(hass)
+
     # Forward to sensor platform — this creates the timer sensor entity
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Register services (idempotent — only registers once)
     _async_register_services(hass)
-
-    # Register event listener for our timer finished events (idempotent)
-    _async_register_event_listener(hass)
 
     # Track climate state changes for HVAC mode persistence
     _async_track_climate_state(hass, entry.entry_id, climate_entity)
