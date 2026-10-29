@@ -12,8 +12,9 @@ import "./timer-display";
  *
  * Requires the Climate Timer integration to be installed. The integration
  * manages timer helpers, HVAC mode persistence, and climate shutdown
- * automatically. The card discovers the managed timer by naming convention
- * and delegates start/cancel to integration services.
+ * automatically. The card discovers the managed timer sensor via its
+ * climate_entity attribute and delegates start/cancel to integration
+ * services.
  */
 @customElement("climate-timer-integration-card")
 export class ClimateTimerCard extends LitElement {
@@ -78,15 +79,32 @@ export class ClimateTimerCard extends LitElement {
   // --- Computed Getters ---
 
   /**
-   * Discovers the managed timer entity using the integration's naming convention.
-   * Pattern: sensor.climate_timer_{entity_slug}
+   * Discovers the managed timer entity created by the integration.
+   *
+   * Primary lookup: the sensor whose `climate_entity` attribute points at
+   * the configured climate entity — this keeps working when the sensor's
+   * entity id is renamed in the entity registry.
+   * Fallback: the integration's deterministic naming convention
+   * (sensor.climate_timer_{entity_slug}).
    */
   private get _managedTimerEntity(): string | null {
     if (!this._config?.entity) return null;
-    const slug = this._config.entity.replace(/\./g, "_");
-    const managed = `sensor.climate_timer_${slug}`;
-    if (this.hass?.states[managed]) {
-      return managed;
+
+    if (this.hass?.states) {
+      for (const [entityId, entityState] of Object.entries(this.hass.states)) {
+        if (
+          entityId.startsWith("sensor.") &&
+          entityState.attributes?.climate_entity === this._config.entity
+        ) {
+          return entityId;
+        }
+      }
+
+      const slug = this._config.entity.replace(/\./g, "_");
+      const managed = `sensor.climate_timer_${slug}`;
+      if (this.hass.states[managed]) {
+        return managed;
+      }
     }
     return null;
   }

@@ -26,6 +26,7 @@ export interface TimerEntityState {
     finishes_at: string;       // ISO timestamp (when active)
     friendly_name: string;
     restore: boolean;
+    climate_entity?: string;   // climate entity this timer sensor is managed for
   };
 }
 
