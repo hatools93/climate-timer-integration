@@ -2,7 +2,7 @@
   "domain": "climate_timer",
   "name": "Climate Timer",
   "codeowners": [
-    "@melanga"
+    "@hatools93"
   ],
   "config_flow": true,
   "dependencies": [
@@ -10,9 +10,9 @@
     "http",
     "logbook"
   ],
-  "documentation": "https://github.com/melanga/climate-timer-integration",
+  "documentation": "https://github.com/hatools93/climate-timer-integration",
   "integration_type": "service",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/melanga/climate-timer-integration/issues",
+  "issue_tracker": "https://github.com/hatools93/climate-timer-integration/issues",
   "version": "1.4.4"
 }

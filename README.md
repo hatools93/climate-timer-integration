@@ -50,7 +50,7 @@ A custom Home Assistant integration that runs any climate entity for a specified
 
 ## What's Different From the Card-Only Approach
 
-The [Climate Timer Card](https://github.com/melanga/climate-timer-card) is a standalone Lovelace card that provides the timer UI but requires you to manually create timer helpers, input selects, and automations to handle the turn-off logic. This integration bundles everything together — no separate card install, no manual helpers, no extra automations.
+The [Climate Timer Card](https://github.com/hatools93/climate-timer) is a standalone Lovelace card that provides the timer UI but requires you to manually create timer helpers, input selects, and automations to handle the turn-off logic. This integration bundles everything together — no separate card install, no manual helpers, no extra automations.
 
 | | Card-Only | This Integration |
 |---|---|---|
