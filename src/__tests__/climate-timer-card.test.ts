@@ -8,7 +8,8 @@ import type { HomeAssistant } from "../ha-types";
  *
  * The card now works exclusively with the Climate Timer integration.
  * - Config only has `entity` (no `timer_entity` or `mode_helper`)
- * - Timer is discovered via naming convention: sensor.climate_timer_{entity.replace('.', '_')}
+ * - Timer is discovered via the sensor's `climate_entity` attribute, with a
+ *   naming-convention fallback: sensor.climate_timer_{entity.replace('.', '_')}
  * - Start calls `climate_timer.start` with { entity_id, duration }
  * - Cancel calls `climate_timer.cancel` with { entity_id }
  * - No client-side HVAC mode resolution or rollback (handled server-side)
@@ -36,6 +37,7 @@ function createMockHass(overrides?: Partial<any>): HomeAssistant {
           finishes_at: "",
           friendly_name: "Climate Timer",
           restore: true,
+          climate_entity: "climate.test_ac",
         },
       },
       ...overrides?.states,
@@ -103,7 +105,7 @@ describe("ClimateTimerCard Integration", () => {
           "sensor.climate_timer_climate_test_ac": {
             entity_id: "sensor.climate_timer_climate_test_ac",
             state: "active",
-            attributes: { duration: "00:30:00", remaining: "00:30:00", finishes_at: finishesAt, friendly_name: "Climate Timer", restore: true },
+            attributes: { duration: "00:30:00", remaining: "00:30:00", finishes_at: finishesAt, friendly_name: "Climate Timer", restore: true, climate_entity: "climate.test_ac" },
           },
         },
       });
@@ -130,7 +132,7 @@ describe("ClimateTimerCard Integration", () => {
           "sensor.climate_timer_climate_test_ac": {
             entity_id: "sensor.climate_timer_climate_test_ac",
             state: "active",
-            attributes: { duration: "00:30:00", remaining: "00:15:00", finishes_at: finishesAt, friendly_name: "Climate Timer", restore: true },
+            attributes: { duration: "00:30:00", remaining: "00:15:00", finishes_at: finishesAt, friendly_name: "Climate Timer", restore: true, climate_entity: "climate.test_ac" },
           },
         },
       });
@@ -175,7 +177,7 @@ describe("ClimateTimerCard Integration", () => {
           "sensor.climate_timer_climate_test_ac": {
             entity_id: "sensor.climate_timer_climate_test_ac",
             state: "active",
-            attributes: { duration: "00:30:00", remaining: "00:05:00", finishes_at: finishesAt, friendly_name: "Climate Timer", restore: true },
+            attributes: { duration: "00:30:00", remaining: "00:05:00", finishes_at: finishesAt, friendly_name: "Climate Timer", restore: true, climate_entity: "climate.test_ac" },
           },
         },
       });
@@ -204,7 +206,7 @@ describe("ClimateTimerCard Integration", () => {
           "sensor.climate_timer_climate_test_ac": {
             entity_id: "sensor.climate_timer_climate_test_ac",
             state: "idle",
-            attributes: { duration: "00:30:00", remaining: "00:00:00", finishes_at: "", friendly_name: "Climate Timer", restore: true },
+            attributes: { duration: "00:30:00", remaining: "00:00:00", finishes_at: "", friendly_name: "Climate Timer", restore: true, climate_entity: "climate.test_ac" },
           },
         },
       });
@@ -220,8 +222,52 @@ describe("ClimateTimerCard Integration", () => {
   });
 
   describe("Managed timer entity discovery", () => {
-    it("discovers managed timer via naming convention", async () => {
+    it("discovers managed timer via the climate_entity attribute", async () => {
       el.hass = createMockHass();
+      await el.updateComplete;
+
+      const managedTimerEntity = (el as any)._managedTimerEntity;
+      expect(managedTimerEntity).toBe("sensor.climate_timer_climate_test_ac");
+    });
+
+    it("discovers a renamed managed timer via the climate_entity attribute", async () => {
+      el.hass = createMockHass({
+        states: {
+          "climate.test_ac": {
+            entity_id: "climate.test_ac",
+            state: "off",
+            attributes: { friendly_name: "Test AC", hvac_modes: ["off", "cool"], temperature: 24, current_temperature: 25 },
+          },
+          "sensor.my_renamed_timer": {
+            entity_id: "sensor.my_renamed_timer",
+            state: "idle",
+            attributes: { duration: "00:30:00", remaining: "00:00:00", finishes_at: "", friendly_name: "Climate Timer", restore: true, climate_entity: "climate.test_ac" },
+          },
+        },
+      });
+      await el.updateComplete;
+
+      const managedTimerEntity = (el as any)._managedTimerEntity;
+      expect(managedTimerEntity).toBe("sensor.my_renamed_timer");
+      // The card still renders the timer UI for the renamed sensor.
+      expect(el.shadowRoot!.querySelector(".start-btn")).not.toBeNull();
+    });
+
+    it("falls back to the naming convention when the climate_entity attribute is missing", async () => {
+      el.hass = createMockHass({
+        states: {
+          "climate.test_ac": {
+            entity_id: "climate.test_ac",
+            state: "off",
+            attributes: { friendly_name: "Test AC", hvac_modes: ["off", "cool"], temperature: 24, current_temperature: 25 },
+          },
+          "sensor.climate_timer_climate_test_ac": {
+            entity_id: "sensor.climate_timer_climate_test_ac",
+            state: "idle",
+            attributes: { duration: "00:30:00", remaining: "00:00:00", finishes_at: "", friendly_name: "Climate Timer", restore: true },
+          },
+        },
+      });
       await el.updateComplete;
 
       const managedTimerEntity = (el as any)._managedTimerEntity;
